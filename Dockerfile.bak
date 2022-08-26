@@ -59,9 +59,6 @@ RUN chmod +x /usr/bin/chromedriver
 # CMD sh -c 'mini_httpd -C /my/config -D &' \
 #  && ./content_computing_loop
 
-RUN mkdir /var/lib/mysql/test
-RUN chmod 777 /var/lib/mysql/test
-
 CMD sh -c '/etc/init.d/mariadb start' \
  && sh -c 'cd /var/www/html/ && ./init.sh' \
  && sh -c 'cd /var/www/html/selenium/ && php run_sides.php &' \
