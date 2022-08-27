@@ -33,6 +33,31 @@ echo '
 <!DOCTYPE html>
 <html>
 <head>
+
+<style>
+.alert {
+  padding: 10px;
+  margin: 4px;
+  background-color:  #2196F3;
+  color: white;
+}
+
+.closebtn {
+  margin-left: 15px;
+  color: white;
+  font-weight: bold;
+  float: right;
+  font-size: 16px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.closebtn:hover {
+  color: black;
+}
+</style>
+
 <style>
 * {
   box-sizing: border-box;
@@ -108,9 +133,17 @@ input[type=submit]:hover {
   padding: 8px;
 }
 
-#jobs tr:nth-child(even){background-color: #f2f2f2;}
+#jobs tr {
+  background-color: #f2f2f2;
+}
 
-#jobs tr:hover {background-color: #ddd;}
+#jobs tr:nth-child(even){
+  background-color: #d9d9d9;
+}
+
+#jobs tr:hover {
+  background-color: #2196F3
+}
 
 #jobs th {
   padding-top: 12px;
@@ -127,15 +160,25 @@ input[type=submit]:hover {
 
 ';
 
+if (@$_GET["msg"] != "") {
+	echo '
+		<div class="alert">
+		  <span class="closebtn" onclick="this.parentElement.style.display=\'none\';">&times;</span> 
+		  <span>'.urldecode($_GET["msg"]).'</span>
+		</div>
+	';
+}
+
 if (@$_POST["Name"] != "" && isset($_FILES["PageFile"]["name"])) {
 	
 	$next_file_name = @mysql_DB_SQL_array("SELECT Id FROM jobs ORDER BY Id DESC LIMIT 1")[0]["Id"] + 1;
 	$FilePath = "selenium/sides/".$next_file_name.".side";
 	
 	if (move_uploaded_file($_FILES["PageFile"]["tmp_name"], $FilePath)) {
-		echo "The file ". htmlspecialchars( basename( $_FILES["PageFile"]["name"])). " has been uploaded.";
+		header('Location: /?msg='."The file ". urlencode(htmlspecialchars( basename( $_FILES["PageFile"]["name"]))). " has been uploaded");
 	} else {
-		echo "Sorry, there was an error uploading your file.";
+		header('Location: /?msg='."Sorry, there was an error uploading your file.");
+		exit;
 	}
 
 	make_pagej($FilePath);
@@ -151,10 +194,31 @@ if (@$_POST["Name"] != "" && isset($_FILES["PageFile"]["name"])) {
 	
 }
 
-if (@$_GET["id"] == "") {
+if (@$_GET["remove"] == "true" && @$_GET["id"] != "") {
+	
+	$item = mysql_DB_SQL_array(
+	"SELECT Name FROM jobs WHERE Id=".$_GET["id"].";"
+	);
+	
+	mysql_DB_SQL_array(
+	"DELETE FROM jobs WHERE Id=".$_GET["id"].";"
+	);
+
+	unlink("selenium/sides/".$_GET["Id"].".side");
+	unlink("selenium/data/".$_GET["Id"].".json");
+	unlink("selenium/last_run/".$_GET["Id"].".txt");
+	
+	header('Location: /?msg='."Removed side: ".urlencode($item[0]["Name"]));
+
+} else if (@$_GET["edit"] == "true" && @$_GET["id"] != "") {
+	
+	//TODO
+	header('Location: /?msg='."Might be implemented later");
+	
+} else {
 
 	echo '
-	<div class="container" style="max-width: 500px;">
+	<div class="container" style="min-width: 480px; float: left; position: relative; margin:4px;">
 	  <form action="" method="post" enctype="multipart/form-data">
 	  <div class="row">
 		<div class="col-25">
@@ -182,10 +246,10 @@ if (@$_GET["id"] == "") {
 	  </div>
 	  <div class="row">
 		<div class="col-25">
-		  <label for="subject">.page file</label>
+		  <label for="subject">.side file</label>
 		</div>
 		<div class="col-75">
-		  <input type="file" name="PageFile">
+		  <input type="file" name="PageFile" accept=".side">
 		</div>
 	  </div>
 	  <br>
@@ -198,15 +262,13 @@ if (@$_GET["id"] == "") {
 	';
 
 	$jobs = mysql_DB_SQL_array(
-	"SELECT Id, Name, Description, UpdateInterval, LastRun FROM jobs"
+	"SELECT Id, Name, Description, UpdateInterval, LastRun, FilePath FROM jobs"
 	);
 
 	echo '
-	<br>
-	<table id="jobs">
+	<table id="jobs" style="float: left; position: relative; margin:4px;">
 	  <tr>
 		<th>Name</th>
-		<th>Description</th>
 		<th>UpdateInterval</th>
 		<th>LastRun</th>
 		<th></th>
@@ -214,23 +276,25 @@ if (@$_GET["id"] == "") {
 	  ';
 
 	foreach($jobs as $job) {
+		$job["FilePath"] = str_replace(array("selenium/sides/", ".side"), "", $job["FilePath"]);
 		echo '<tr>';
-		echo "<td>".$job["Name"]."</td>\n";
-		echo "<td>".$job["Description"]."</td>\n";
+		echo '<td title="'.$job["Description"].'">'.$job["Name"]."</td>\n";
 		echo "<td>".$job["UpdateInterval"]."</td>\n";
 		echo "<td>".$job["LastRun"]."</td>\n";
 		echo "
 		<td>
-			<a href=\"selenium/last_run/".$job["Id"].".txt\">Last Run Log</a>
-			<a href=\"selenium/data/".$job["Id"].".json\">Json Endpoint</a>
-			<a href=\"selenium/sides/".$job["Id"].".side\" download>DW .side file</a>
+			<a href=\"selenium/last_run/".$job["FilePath"].".txt\">Last Run Log</a>
+			<a href=\"selenium/data/".$job["FilePath"].".json\">Json Endpoint</a>
+			<a href=\"selenium/sides/".$job["FilePath"].".side\" download>DW .side file</a>
 			<a href=\"?edit=true&id=".$job["Id"]."\">Edit</a>
 			<a href=\"?remove=true&id=".$job["Id"]."\">Remove</a>
 		</td>";
 		echo '</tr>';
 	}
 
-	echo "</table>";
+	echo "</table>
+	
+	</div>";
 
 }
 
