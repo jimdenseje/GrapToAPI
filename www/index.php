@@ -34,6 +34,25 @@ echo '
 <html>
 <head>
 
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+</script>
+
+<script>
+$(document).ready(function(){
+  $("#flip").click(function(){
+    $("#panel").slideToggle("fast");
+  });
+});
+</script>
+
+<script>
+$(document).ready(function(){
+  $("#flip2").click(function(){
+    $("#panel2").slideToggle("fast");
+  });
+});
+</script>
+
 <style>
 .alert {
   padding: 10px;
@@ -61,6 +80,8 @@ echo '
 <style>
 * {
   box-sizing: border-box;
+  margin: 0px;
+  padding: 4px;
 }
 
 input[type=text], input[type=file], select, textarea {
@@ -91,9 +112,29 @@ input[type=submit]:hover {
 }
 
 .container {
-  border-radius: 5px;
   background-color: #f2f2f2;
   padding: 20px;
+  width: 100%;
+  position: relative;
+  margin-top: 0px;
+  margin-bottom: 8px;
+}
+
+.title {
+  padding: 10px;
+  padding-left: 20px;
+  padding-bottom: 10px;
+  text-align: left;
+  background-color: #04AA6D;
+  color: white;
+  font-size: 16px;
+  border-bottom: 10px solid green;
+  width: calc(100vw - 8px - 12px);
+  position: relative;
+  margin-bottom:0px;
+  cursor:pointer;
+  
+  margin-top:8px;
 }
 
 .col-25 {
@@ -126,7 +167,10 @@ input[type=submit]:hover {
 #jobs {
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
-  min-width: 500px;
+  width: calc(100vw - 8px - 8px - 4px);
+  float: left;
+  position: relative;
+  margin:4px;
 }
 
 #jobs td, #jobs th {
@@ -151,6 +195,35 @@ input[type=submit]:hover {
   text-align: left;
   background-color: #04AA6D;
   color: white;
+}
+
+
+#panel
+{
+display:none;
+}
+
+
+#panel2
+{
+display:none;
+}
+
+@media (min-width:600px) { 
+    
+  #jobs {
+    min-width: 500px;
+    width: auto;
+  }
+
+  .container {
+    max-width: 480px;
+  }
+
+  .title {
+    max-width: 480px;
+  }
+
 }
 
 </style>
@@ -218,7 +291,9 @@ if (@$_GET["remove"] == "true" && @$_GET["id"] != "") {
 } else {
 
 	echo '
-	<div class="container" style="min-width: 480px; float: left; position: relative; margin:4px;">
+  <span style=" float: left; margin-top:-8px;">
+  <div class="title" id="flip">Create Selenium IDE Job</div>
+	<div class="container" id="panel">
 	  <form action="" method="post" enctype="multipart/form-data">
 	  <div class="row">
 		<div class="col-25">
@@ -258,7 +333,50 @@ if (@$_GET["remove"] == "true" && @$_GET["id"] != "") {
 	  </div>
 	  </form>
 	</div>
-	
+  
+  <div class="title" id="flip2">Create PHP Hack Job</div>
+	<div class="container" id="panel2">
+    
+	  <form action="" method="post" enctype="multipart/form-data">
+	  <div class="row">
+		<div class="col-25">
+		  <label>Name</label>
+		</div>
+		<div class="col-75">
+		  <input type="text" name="Name" placeholder="Name of you job">
+		</div>
+	  </div>
+	  <div class="row">
+		<div class="col-25">
+		  <label>Description</label>
+		</div>
+		<div class="col-75">
+		  <textarea name="Description" placeholder="Write something.." style="height:200px"></textarea>
+		</div>
+	  </div>
+	  <div class="row">
+		<div class="col-25">
+		  <label>UpdateInterval</label>
+		</div>
+		<div class="col-75">
+		  <input type="text" name="UpdateInterval" placeholder="In Minutes, Minimum 10">
+		</div>
+	  </div>
+	  <div class="row">
+		<div class="col-25">
+		  <label for="subject">.side file</label>
+		</div>
+		<div class="col-75">
+		  <input type="file" name="PageFile" accept=".side">
+		</div>
+	  </div>
+	  <br>
+	  <div class="row">
+		<input type="submit" value="Create Job" >
+	  </div>
+	  </form>
+	</div>
+	</span>
 	';
 
 	$jobs = mysql_DB_SQL_array(
@@ -266,7 +384,7 @@ if (@$_GET["remove"] == "true" && @$_GET["id"] != "") {
 	);
 
 	echo '
-	<table id="jobs" style="float: left; position: relative; margin:4px;">
+	<table id="jobs">
 	  <tr>
 		<th>Name</th>
 		<th>UpdateInterval</th>

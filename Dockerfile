@@ -9,12 +9,12 @@ ENV HOME /root
 RUN apt-get update -y
 RUN apt-get upgrade -y --no-install-recommends
 RUN apt-get install -y --no-install-recommends apache2 php php-curl curl php-mysqli
-RUN apt-get install -y --no-install-recommends npm
 RUN apt-get install -y --no-install-recommends wget unzip
 RUN apt-get install -y --no-install-recommends mariadb-server
+RUN apt-get install -y --no-install-recommends ca-certificates
 
 # Install google chrome
-RUN wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_104.0.5112.79-1_amd64.deb
+RUN wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_112.0.5615.165-1_amd64.deb
 RUN apt install -y --no-install-recommends /tmp/chrome.deb
 RUN rm /tmp/chrome.deb
 
@@ -41,13 +41,15 @@ COPY www /var/www/html
 RUN chmod -R 777 /var/www/html
 
 # Install latest NPM
-# RUN curl -L https://npmjs.org/install.sh | sh
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+RUN apt-get install -y --no-install-recommends nodejs
+RUN npm install -g npm@latest
 
 # Install selenium-side-runner
-RUN npm install -g --legacy-peer-deps selenium-side-runner
+RUN npm install -g selenium-side-runner
 
 # install chrome driver
-RUN wget https://chromedriver.storage.googleapis.com/104.0.5112.79/chromedriver_linux64.zip
+RUN wget https://chromedriver.storage.googleapis.com/112.0.5615.49/chromedriver_linux64.zip
 RUN unzip chromedriver_linux64.zip
 RUN rm chromedriver_linux64.zip
 RUN mv chromedriver /usr/bin/chromedriver
